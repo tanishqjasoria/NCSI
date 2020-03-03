@@ -10,7 +10,7 @@
 
    See the file readme.txt for details of compiling and running the model.  
    
-   %%% © Muhammad S.A. Zilany (msazilany@gmail.com), Ian C. Bruce, Paul C. Nelson, and laurel H. Carney October 2008 %%%
+   %%% Muhammad S.A. Zilany (msazilany@gmail.com), Ian C. Bruce, Paul C. Nelson, and laurel H. Carney October 2008 %%%
    
 */
 
@@ -43,7 +43,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	
 	double *px, cf, tdres, fibertype, implnt;
-	int    nrep, pxbins, lp, outsize[2], totalstim;
+	int    nrep, pxbins, lp, totalstim;
+
+    long long outsize[2];
 
 	double *pxtmp, *cftmp, *nreptmp, *tdrestmp, *fibertypetmp, *implnttmp;
         

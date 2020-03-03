@@ -4,19 +4,19 @@
         Zilany, M. S. A. and Bruce, I. C. (2007). "Representation of the vowel
         /eh/ in normal and impaired auditory nerve fibers: Model predictions of
         responses in cats," Journal of the Acoustical Society of America
-        122(1):402–417.    
+        122(1):402-417.    
 
         Zilany, M. S. A. and Bruce, I. C. (2006). "Modeling auditory-nerve
         responses for high sound pressure levels in the normal and impaired
         auditory periphery," Journal of the Acoustical Society of
-        America 120(3):1446–1466.
+        America 120(3):1446-1466.
 
    Please cite these papers if you publish any research
    results obtained with this code or any modified versions of this code.
 
    See the file readme.txt for details of compiling and running the model.  
    
-   %%% © Ian C. Bruce (ibruce@ieee.org) and M. S. Arefeen Zilany, June 2006 %%%
+   %%% Ian C. Bruce (ibruce@ieee.org) and M. S. Arefeen Zilany, June 2006 %%%
    
 */
 
@@ -49,7 +49,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	
 	double *px, cf, tdres, reptime, cohc, cihc;
-	int    nrep, pxbins, lp, outsize[2], totalstim;
+	int    nrep, pxbins, lp, totalstim;
+
+    long long outsize[2];
 
 	double *pxtmp, *cftmp, *nreptmp, *tdrestmp, *reptimetmp, *cohctmp, *cihctmp;
 	
@@ -123,8 +125,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	totalstim = (int)floor((reptime*1e3)/(tdres*1e3));    
 
     px = (double*)mxCalloc(totalstim,sizeof(double)); 
-
-	/* Put stimulus waveform into pressure waveform */
+	
+    /* Put stimulus waveform into pressure waveform */
 
 	for (lp=0; lp<pxbins; lp++)
 			px[lp] = pxtmp[lp];
@@ -136,7 +138,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
 	plhs[0] = mxCreateNumericArray(2, outsize, mxDOUBLE_CLASS, mxREAL);
 	
-	/* Assign pointers to the outputs */
+    /* Assign pointers to the outputs */
 	
 	ihcout  = mxGetPr(plhs[0]);
 		
