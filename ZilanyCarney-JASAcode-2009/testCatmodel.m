@@ -1,16 +1,16 @@
 % model fiber parameters
 clear all; 
-CF    = 10.0e3; % CF in Hz;   
+CF    = 500; % CF in Hz;   
 cohc  = 1.0;   % normal ohc function
 cihc  = 1.0;   % normal ihc function
 fiberType = 3; % spontaneous rate (in spikes/s) of the fiber BEFORE refractory effects; "1" = Low; "2" = Medium; "3" = High
 implnt = 0;    % "0" for approximate or "1" for actual implementation of the power-law functions in the Synapse
 % stimulus parameters
-F0 = CF;     % stimulus frequency in Hz
-Fs = 100e3;  % sampling rate in Hz (must be 100, 200 or 500 kHz)
-T  = 50e-3;  % stimulus duration in seconds
-rt = 5e-3;   % rise/fall time in seconds
-stimdb = 10; % stimulus intensity in dB SPL
+F0 = 62.5;     % stimulus frequency in Hz
+Fs = 50e3;  % sampling rate in Hz (must be 100, 200 or 500 kHz)
+T  = 200e-3;  % stimulus duration in seconds
+rt = 10e-3;   % rise/fall time in seconds
+stimdb = 30; % stimulus intensity in dB SPL
 % PSTH parameters
 nrep = 1               % number of stimulus repetitions (e.g., 50);
 psthbinwidth = 0.5e-3; % binwidth in seconds;
@@ -25,13 +25,13 @@ pin((mxpts-irpts):mxpts)=pin((mxpts-irpts):mxpts).*(irpts:-1:0)/irpts;
 
 vihc = catmodel_IHC(pin,CF,nrep,1/Fs,T*2,cohc,cihc); 
 [synout,psth] = catmodel_Synapse(vihc,CF,nrep,1/Fs,fiberType,implnt); 
-
+disp(size(psth));
 timeout = (1:length(psth))*1/Fs;
 psthbins = round(psthbinwidth*Fs);  % number of psth bins per psth bin
 psthtime = timeout(1:psthbins:end); % time vector for psth
 pr = sum(reshape(psth,psthbins,length(psth)/psthbins))/nrep; % pr of spike in each bin
 Psth = pr/psthbinwidth; % psth in units of spikes/s
- 
+            
 figure
 subplot(4,1,1)
 plot(timeout,[pin zeros(1,length(timeout)-length(pin))])

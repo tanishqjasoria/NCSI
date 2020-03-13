@@ -19,14 +19,14 @@ implnt = 0;    % "0" for approximate or "1" for actual implementation of the pow
 
 % stimulus parameters
 F0 = CF_1;     % stimulus frequency in Hz
-Fs = 50e3;  % sampling rate in Hz (must be 100, 200 or 500 kHz)
+Fs = 100e3;  % sampling rate in Hz (must be 100, 200 or 500 kHz)
 T  = 200e-3;  % stimulus duration in seconds
 rt = 10e-3;   % rise/fall time in seconds
 stimdb = 10; % stimulus intensity in dB SPL
 
 % PSTH parameters
 nrep = 50               % number of stimulus repetitions (e.g., 50);
-psthbinwidth = 0.5e-3; % binwidth in seconds;
+psthbinwidth = 0.1e-3; % binwidth in seconds;
 
 % Experimental Parameters
 stimdb_range    = stimdb_start:stimdb_step:stimdb_stop;
@@ -37,12 +37,12 @@ data_1 = zeros(length(frequency_range), length(stimdb_range));
 
 for frequency_index=1:length(frequency_range)
     data_intensity = zeros(1, length(stimdb_range));
+    frequency = frequency_range(frequency_index);
     for intensity_index=1:length(stimdb_range)
-        frequency = frequency_range(frequency_index);
         intensity = stimdb_range(intensity_index);
         
         pin = get_stim(frequency, Fs, T, rt, intensity);
-        [synout, psth] = ANModel(nrep, pin, CF_1, Fs, T, cohc, cihc, fiberType, implnt);
+        [synout, psth] = ANModel(nrep, pin, CF_1, Fs, T, cohc, cihc, fiberType, implnt, psthbinwidth);
         
         data_intensity(1, intensity_index) = sum(psth);
     end
@@ -53,47 +53,75 @@ data_2 = zeros(length(frequency_range), length(stimdb_range));
 
 for frequency_index=1:length(frequency_range)
     data_intensity = zeros(1, length(stimdb_range));
+    frequency = frequency_range(frequency_index);
     for intensity_index=1:length(stimdb_range)
-        frequency = frequency_range(frequency_index);
         intensity = stimdb_range(intensity_index);
         
         pin = get_stim(frequency, Fs, T, rt, intensity);
-        [synout, psth] = ANModel(nrep, pin, CF_1, Fs, T, cohc, cihc, fiberType, implnt);
+        [synout, psth] = ANModel(nrep, pin, CF_2, Fs, T, cohc, cihc, fiberType, implnt, psthbinwidth);
         
         data_intensity(1, intensity_index) = sum(psth);
     end
     data_2(frequency_index, :) = data_intensity;
 end
+figure
+hold on;
+
+xtick = 62.5*2.^(0:(1.0/8):9);
+set(gca,'XTick',xtick);
+contour(gca, data_1');
+ 
+figure
+hold on;
+
+xtick = 62.5*2.^(0:(1.0/8):9);
+set(gca,'XTick',xtick)
+%imagesc(gca, [frequency_range(1), frequency_range(length(frequency_range))], [stimdb_range(1) , stimdb_range(length(stimdb_range))] , data_1');
+contour(gca, data_2')
+%imagesc('XData',freqRange,'YData',intensityRange,'CData',experimentData')
+ 
+% figure;
+% for i=1:length(data_1)
+%     hold on;
+%     plot(stimdb_range, data_1(i, :));
+% end
+
+data_intensity_CF1 = zeros(1, length(stimdb_range));
+for intensity_index=1:length(stimdb_range)
+    intensity = stimdb_range(intensity_index);
+
+    pin = get_stim(CF_1, Fs, T, rt, intensity);
+    [synout, psth] = ANModel(nrep, pin, CF_1, Fs, T, cohc, cihc, fiberType, implnt, psthbinwidth);
+
+    data_intensity_CF1(1, intensity_index) = sum(psth);
+end
 
 figure;
-plot(stimdb_range, data2(1, :)); 
+hold on;
+plot(stimdb_range, data_intensity_CF1,'DisplayName','500');
 
-% pin = get_stim(F0, Fs, T, rt, stimdb) % generate the required stimulus
-% 
-% vihc = catmodel_IHC(pin,CF_1,nrep,1/Fs,T*2,cohc,cihc); 
-% [synout,psth] = catmodel_Synapse(vihc,CF_1,nrep,1/Fs,fiberType,implnt); 
-% 
-% timeout = (1:length(psth))*1/Fs;
-% psthbins = round(psthbinwidth*Fs);  % number of psth bins per psth bin
-% psthtime = timeout(1:psthbins:end); % time vector for psth
-% pr = sum(reshape(psth,psthbins,length(psth)/psthbins))/nrep; % pr of spike in each bin
-% Psth = pr/psthbinwidth; % psth in units of spikes/s
-%  
-% figure
-% subplot(4,1,1)
-% plot(timeout,[pin zeros(1,length(timeout)-length(pin))])
-% title('Input Stimulus')
-% 
-% subplot(4,1,2)
-% plot(timeout,vihc(1:length(timeout)))
-% title('IHC output')
-% 
-% subplot(4,1,3)
-% plot(timeout,synout); 
-% title('Synapse Output')
-% xlabel('Time (s)')
-% 
-% subplot(4,1,4)
-% plot(psthtime,Psth)
-% title('psth')
-% xlabel('Time (s)')
+data_intensity_CF2 = zeros(1, length(stimdb_range));
+for intensity_index=1:length(stimdb_range)
+    intensity = stimdb_range(intensity_index);
+
+    pin = get_stim(CF_2, Fs, T, rt, intensity);
+    [synout, psth] = ANModel(nrep, pin, CF_2, Fs, T, cohc, cihc, fiberType, implnt, psthbinwidth);
+
+    data_intensity_CF2(1, intensity_index) = sum(psth);
+end
+
+plot(stimdb_range, data_intensity_CF2,'DisplayName','4000');
+legend()
+
+function [psthtime, Psth] = ANModel(nrep, pin, CF, Fs , T, cohc, cihc, fibreType, implnt, psthbinwidth)
+    vihc = catmodel_IHC(pin,CF,nrep,1.0/Fs,T*2,cohc,cihc); 
+    [synout,psth] = catmodel_Synapse(vihc,CF,nrep,1.0/Fs,fibreType, implnt);
+    disp(length(psth))
+    timeout = (1:length(psth))*1/Fs;
+    psthbins = round(psthbinwidth*Fs);  % number of psth bins per psth bin
+    psthtime = timeout(1:psthbins:end); % time vector for psth
+    pr = sum(reshape(psth,psthbins,length(psth)/psthbins))/nrep; % pr of spike in each bin
+    Psth = pr/psthbinwidth; % psth in units of spikes/s
+end
+
+
